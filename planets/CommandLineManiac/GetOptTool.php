@@ -7,9 +7,10 @@ namespace CommandLineManiac;
  */
 use CommandLineManiac\Exception\SilentException;
 
-class GetOptTool {
+class GetOptTool
+{
 
-    public static function getOptionAsString($optName, $options)
+    public static function getOptionAsString($optName, array $options)
     {
         if (array_key_exists($optName, $options)) {
             $val = $options[$optName];
@@ -21,7 +22,7 @@ class GetOptTool {
         throw new SilentException();
     }
 
-    public static function getOptionAsArray($optName, $options)
+    public static function getOptionAsArray($optName, array $options, $sep = ',')
     {
         if (array_key_exists($optName, $options)) {
             $val = $options[$optName];
@@ -29,7 +30,7 @@ class GetOptTool {
                 return $val;
             }
             elseif (is_string($val)) {
-                $val = explode(',', $val);
+                $val = explode($sep, $val);
                 array_walk($val, function (&$v) {
                     $v = trim($v);
                 });

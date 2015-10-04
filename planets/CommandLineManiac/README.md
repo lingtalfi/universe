@@ -23,8 +23,8 @@ This tool is to be used along with the native getopt php function.
 The problem with getopt is this:
 
 ```bash
-    my_script -i 4 -i 5 -i 6    # i is an array
-    my_script -i 4              # i is a string
+my_script -i 4 -i 5 -i 6    # i is an array
+my_script -i 4              # i is a string
 ```
     
     
@@ -35,20 +35,33 @@ GetOptTool contains two functions to do just that:
     
 ```php
     
-    $options = getopt("l:s:");
-    
-    
-    if (array_key_exists('l', $options)) {
-        $action = "list";
-        $value = GetOptTool::getOptionAsString('l', $options); 
-        // now you know for sure that $value contains a string
-    }
+$options = getopt("l:s:");
 
-    if (array_key_exists('s', $options)) {
-        $statusValues = GetOptTool::getOptionAsArray('s', $options);
-        // now you know for sure that $statusValues contains an array
-    }
+
+if (array_key_exists('l', $options)) {
+    $action = "list";
+    $value = GetOptTool::getOptionAsString('l', $options); 
+    // now you know for sure that $value contains a string
+}
+
+if (array_key_exists('s', $options)) {
+    $statusValues = GetOptTool::getOptionAsArray('s', $options);
+    // now you know for sure that $statusValues contains an array
+}
 ```
+
+
+Also, the GetOptTool::getOptionAsArray method can parse a string using a separator, 
+so for instance the following notations are all equivalent:
+
+
+```bash
+my_script -i 4 -i 5 -i 6            # standard php getopt way of creating arrays
+my_script -i 4,5,6                  # GetOptTool::getOptionAsArray parses this as an array automatically
+my_script -i "4, 5, 6"              # This too, but don't forget the quotes 
+my_script -i 4.5.6                  # We can also specify a different separator, like a dot
+```
+
 
 
 
