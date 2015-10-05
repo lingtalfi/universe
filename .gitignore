@@ -2,5 +2,11 @@
 .DS_Store
 .idea/
 private/
+www/
+
+
+# 
 Dreamer/
+Observer/
+NotationFan/
 

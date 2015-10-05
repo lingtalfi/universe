@@ -7,4 +7,8 @@ namespace CommandLineManiac\Exception;
  */
 class SilentException extends \Exception {
 
+    /**
+     *    this is some comments. fuck me! newline
+     */
+    
 }
