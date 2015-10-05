@@ -4,7 +4,7 @@ Butineur Autoloader
 
 
 
-This is a simple [BSR-0] (https://github.com/lingtalfi/universe/blob/master/planets/BumbleBee/Autoload/convention.bsr0.eng.txt)
+This is a simple [BSR-0] (https://github.com/lingtalfi/universe/blob/master/planets/BumbleBee/Autoload/convention.bsr0.eng.md)
 autoloader for any php project.
 
 
@@ -36,4 +36,4 @@ ButineurAutoLoader::getInst()
 
 That's it!
 Now you can use any classes that you want in your application.
-For a concrete example, please look in the [BSR-0 convention file] (https://github.com/lingtalfi/universe/blob/master/planets/BumbleBee/Autoload/convention.bsr0.eng.txt).
+For a concrete example, please look in the [BSR-0 convention file] (https://github.com/lingtalfi/universe/blob/master/planets/BumbleBee/Autoload/convention.bsr0.eng.md).
