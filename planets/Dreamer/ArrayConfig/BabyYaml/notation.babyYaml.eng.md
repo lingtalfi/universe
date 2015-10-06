@@ -190,15 +190,15 @@ When you use multi-line, you can imagine a left margin
 that is used to strip off the leading indentation spaces.
 In the following example I drew the imaginary margin to help visualizing: 
  
-    |
-    |
-mailSignature: <
-    This is my mail signature.
-    Cheers.                           
->                    
-    |
-    |        
-    
+        |
+        |
+    mailSignature: <
+        This is my mail signature.
+        Cheers.                           
+    >                    
+        |
+        |        
+        
 The resulting text will not contain the indentation spaces.
 The text will be:
 
