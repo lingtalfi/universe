@@ -13,7 +13,7 @@ It is inspired by PSR-0 notation, but is simpler.
 
 
 
-Basically, it's like [PRS-0] ( https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md ), 
+Basically, it's like [PSR-0] ( https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md ), 
 except that the underscore has no special meaning.
 This means that your namespace has to match the tree structure exactly. Period.
 
