@@ -3,8 +3,11 @@
 .idea/
 private/
 www/
+*\.pending\.*
 
 
 # 
 Observer/
+Krank/
+SitemapBuilder/
 
