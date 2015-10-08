@@ -158,7 +158,9 @@ but a BSR-0 autoloder will not be able to load all "PSR-0" classes.
 The reason why I use a BSR-0 autoloader is that it's straight to the point, whereas 
 PSR-0 autoloader tries to handle old (and obsolete) class naming schemes that I was sure I would never use.
 
-Therefore BSR-0 autoloader's code is more concise and very focused on one thing, it tends to be simpler.
+Therefore BSR-0 autoloader's code is more concise and very focused on one thing, it tends to be simpler.<br>
+For instance, if you have the ButineurAutoloader ready in your application, the only thing you need to import and start using a BSR-0 package 
+is to drop the package in one of your locations, just like that.
 
 
 
