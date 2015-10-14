@@ -1,3 +1,13 @@
+### Disclaimer (2015-10-14)
+
+The 
+[universe](https://github.com/lingtalfi/universe/) 
+has collapsed, and was reborn, its components are dispatched all over the place, expanding.
+
+This BumbleBee package is a dead copy of the 
+[new BumbleBee package](https://github.com/lingtalfi/BumbleBee)
+
+
 Butineur Autoloader
 =========================
 2015-10-05
