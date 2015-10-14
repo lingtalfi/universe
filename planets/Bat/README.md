@@ -1,3 +1,13 @@
+### Disclaimer
+
+The 
+[universe](https://github.com/lingtalfi/universe/) 
+has collapsed, and was reborn, its components are dispatched all over the place, expanding.
+
+This Bat package is a dead copy of the 
+[new Bat package](https://github.com/lingtalfi/Bat)
+
+
 Bat
 ==========
 2015-10-07
