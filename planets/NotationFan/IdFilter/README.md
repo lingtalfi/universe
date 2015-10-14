@@ -1,3 +1,14 @@
+### Disclaimer (2015-10-14)
+
+The 
+[universe](https://github.com/lingtalfi/universe/) 
+has collapsed, and was reborn, its components are dispatched all over the place, expanding.
+
+This IdFilter package is a dead copy of the 
+[new IdFilter package](https://github.com/lingtalfi/NotationFan/tree/master/IdFilter)
+
+
+
 Id Filter
 ========================
 2015-10-06
