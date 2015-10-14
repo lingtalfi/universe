@@ -4,11 +4,12 @@
 .idea/
 private/
 www/
-*\.pending\.*
+*.pending.*
+*.depr.*
 
 
 # 
 Observer/
+Db2SitemapBridge/
 Krank/
-SitemapBuilder/
 
