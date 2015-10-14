@@ -5,7 +5,7 @@ The
 has collapsed, and was reborn, its components are dispatched all over the place, expanding.
 
 This BumbleBee package is a dead copy of the 
-[new BumbleBee package](https://github.com/lingtalfi/BumbleBee)
+[new BumbleBee package](https://github.com/lingtalfi/BumbleBee/tree/master/Autoload)
 
 
 Butineur Autoloader
