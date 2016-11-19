@@ -41,16 +41,16 @@ remains the same, and can be used to import any set of classes.
 
 
 Basically, we whole trick is to combine the [include_path directive](http://php.net/manual/en/ini.core.php#ini.include-path)
-in your php.ini with an autoloader class, such as the [ButineurAutoloader](https://github.com/lingtalfi/universe/tree/master/planets/BumbleBee/Autoload).
+in your php.ini with an autoloader class, such as the [ButineurAutoloader](https://github.com/lingtalfi/BumbleBee/tree/master/Autoload).
 
 
 
 Here is the concrete setup recipe, it has to be done once per machine:
 
 
-1. Create a loader script, based on the [ButineurAutoloader](https://github.com/lingtalfi/universe/tree/master/planets/BumbleBee/Autoload) example, 
+1. Create a loader script, based on the [ButineurAutoloader](https://github.com/lingtalfi/BumbleBee/tree/master/Autoload) example, 
     and which loads the set of classes that you want to use.<br>
-    If you want to use the [universe](https://github.com/lingtalfi/universe) classes like I did, you can simply skip this step and use my [bigbang.php](https://github.com/lingtalfi/universe/tree/master/planets/TheScientist/bigbang/bigbang.php) script directly.
+    If you want to use the [universe](https://github.com/lingtalfi/universe) classes like I did, you can simply skip this step and use my [bigbang.php](https://github.com/lingtalfi/TheScientist/blob/master/bigbang/bigbang.php) script directly.
         
         
 2. Now we need to make sure that when we call this one line from our application:
@@ -124,7 +124,7 @@ So my point here is this: choose your name thoughtfully, and know your include_p
 
 ### Your autoloader script as a booter script
 
-Also, I love to use two debug functions: a and az, which are basically aliases for the native php var_dump function.
+Also, I love to use two debug functions: a and [az](https://github.com/lingtalfi/az-functions), which are basically aliases for the native php var_dump function.
 From my experience, they are a huge time saver, and I recommend that you try them as soon as possible, and
 I'm pretty sure they will never quit you for php development.
 

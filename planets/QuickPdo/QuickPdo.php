@@ -13,11 +13,23 @@ class QuickPdo
 {
 
 
+    public static $fetchStyle = \PDO::FETCH_ASSOC;
+
     /**
      * @var \PDO
      */
     private static $conn;
-    private static $stmt;
+    private static $query;
+    /**
+     * @var array containing statement/connection errors
+     * The format is:
+     *      - 0: SQLSTATE error code
+     *      - 1: Driver-specific error code
+     *      - 2: Driver-specific error message
+     *      - 3: this class' method name
+     *
+     */
+    private static $errors = [];
 
     public static function setConnection($dsn, $user, $pass, array $options)
     {
@@ -42,38 +54,90 @@ class QuickPdo
     }
 
 
-
     //------------------------------------------------------------------------------/
     // 
     //------------------------------------------------------------------------------/
     /**
+     * Return false|int
+     */
+    public static function count($table)
+    {
+        $query = "select count(*) as count from $table";
+        $pdo = self::getConnection();
+        self::$query = $query;
+        $stmt = $pdo->prepare($query);
+        if (true === $stmt->execute()) {
+            $res = $stmt->fetch(\PDO::FETCH_ASSOC);
+            return (int)$res['count'];
+        }
+        self::handleStatementErrors($stmt, 'count');
+        return false;
+    }
+
+    /**
      * @return false|int, last insert id
      * Errors are accessible via a getError method
      *
+     * Common errors are:
+     * - SQLSTATE[42S22]: Column not found: 1054 Unknown column 'dddescription'
+     * - SQLSTATE[42S02]: Base table or view not found: 1146 Table 'calendar.the_ev' doesn't exist
+     * - SQLSTATE[HY000]: General error: 1364 Field 'end_date' doesn't have a default value
+     *
+     *
      */
-    public static function insert($table, array $fields)
+    public static function insert($table, array $fields, $keyword = '')
     {
-        $stmt = 'insert into ' . $table . ' set ';
+        $query = 'insert ' . $keyword . ' into ' . $table . ' set ';
         $first = true;
         $markers = [];
         foreach ($fields as $k => $v) {
             if (true === $first) {
                 $first = false;
+            } else {
+                $query .= ', ';
             }
-            else {
-                $stmt .= ',';
-            }
-            $stmt .= $k . '=:' . $k;
+            $query .= $k . '=:' . $k;
             $markers[':' . $k] = $v;
         }
 
-
         $pdo = self::getConnection();
-        self::$stmt = $stmt;
-        $query = $pdo->prepare($stmt);
-        if (true === $query->execute($markers)) {
+        self::$query = $query;
+        $stmt = $pdo->prepare($query);
+        if (true === $stmt->execute($markers)) {
             return $pdo->lastInsertId();
         }
+        self::handleStatementErrors($stmt, 'insert');
+        return false;
+    }
+
+
+    /**
+     * @return bool, whether or not the replacement was successful.
+     * Errors are accessible via a getError method
+     *
+     */
+    public static function replace($table, array $fields, $keyword = '')
+    {
+        $query = 'replace ' . $keyword . ' into ' . $table . ' set ';
+        $first = true;
+        $markers = [];
+        foreach ($fields as $k => $v) {
+            if (true === $first) {
+                $first = false;
+            } else {
+                $query .= ', ';
+            }
+            $query .= $k . '=:' . $k;
+            $markers[':' . $k] = $v;
+        }
+
+        $pdo = self::getConnection();
+        self::$query = $query;
+        $stmt = $pdo->prepare($query);
+        if (true === $stmt->execute($markers)) {
+            return true;
+        }
+        self::handleStatementErrors($stmt, 'replace');
         return false;
     }
 
@@ -81,62 +145,69 @@ class QuickPdo
     /**
      * Returns true|false
      *
-     * - whereConds: array of whereCond|glue
-     * with:
      *
-     * - whereCond:
-     * ----- 0: field
-     * ----- 1: operator (<, =, >, <=, >=, like, between)
-     * ----- 2: operand (the value to compare the field with)
-     * ----- ?3: operand 2, only if between operator is used
+     * - fields: array of key => fieldEntry.
+     *      A fieldEntry is either a string or an array.
+     *      If it's a string, it represents the value of the key.
      *
-     *          Note: for mysql users, if the like operator is used, the operand can contain the wildcards chars:
+     *      If it's an array, then its first key is an expression injected directly into the mysql statement (without the
+     *          usual mysql secured preparation).
      *
-     *          - %: matches any number of characters, even zero characters
-     *          - _: matches exactly one character
+     *      This helps for the case where you want to perform an increment or decrement of a value.
+     *      For instance:
+     *                  update users set nb_points=nb_points+1 where id=6
      *
-     *          To use the literal version of a wildcard char, prefix it with backslash (\%, \_).
-     *          See mysql docs for more info.
+     *      In this case, the fields array should look like this:
+     *              [
+     *                  'nb_points' => ['nb_points+1'],
+     *              ]
      *
      *
-     * - glue: string directly injected in the statement, so that one
-     *              can create the logical AND and OR and parenthesis operators.
-     *              We can also use it with the IN keyword, for instance:
-     *                      - in ( 6, 8, 9 )
-     *                      - in ( :doo, :foo, :koo )
-     *              In the latter case, we will also pass corresponding markers manually using the $extraMarkers argument.
-     *                      doo => 6,
-     *                      koo => 'something',
-     *                      ...
+     *
+     *
+     * - whereConds: glue | array of (whereCond | glue)
+     *              see QuickPdoStmtTool::addWhereSubStmt comments for more details,
+     *              or on the web at https://github.com/lingtalfi/QuickPdo#the-where-notation
+     *
+     *
+     * Common errors are:
+     * - SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax;
+     * - SQLSTATE[42S02]: Base table or view not found: 1146 Table 'calendar.the_ev' doesn't exist
+     * - SQLSTATE[42S22]: Column not found: 1054 Unknown column 'dddescription'
      *
      *
      *
      */
-    public static function update($table, array $fields, $whereConds, array $extraMarkers = [])
+    public static function update($table, array $fields, $whereConds = [], array $extraMarkers = [])
     {
-
         $pdo = self::getConnection();
-        $stmt = 'update ' . $table . ' set ';
+        $query = 'update ' . $table . ' set ';
         $markers = [];
         $first = true;
         foreach ($fields as $k => $v) {
             if (true === $first) {
                 $first = false;
+            } else {
+                $query .= ',';
             }
-            else {
-                $stmt .= ',';
+
+            if (!is_array($v)) {
+                $query .= $k . '=:' . $k;
+                $markers[':' . $k] = $v;
+            } else {
+                $v = array_shift($v);
+                $query .= "$k=$v";
             }
-            $stmt .= $k . '=:' . $k;
-            $markers[':' . $k] = $v;
         }
 
-        self::addWhereSubStmt($whereConds, $stmt, $markers);
+        self::addWhereSubStmt($whereConds, $query, $markers);
         $markers = array_replace($markers, $extraMarkers);
-        self::$stmt = $stmt;
-        $query = $pdo->prepare($stmt);
-        if (true === $query->execute($markers)) {
+        self::$query = $query;
+        $stmt = $pdo->prepare($query);
+        if (true === $stmt->execute($markers)) {
             return true;
         }
+        self::handleStatementErrors($stmt, 'update');
         return false;
     }
 
@@ -144,49 +215,67 @@ class QuickPdo
     /**
      * Returns false|int, the number of deleted rows
      * For whereConds format, see update method.
+     *
+     * Common errors are:
+     * - SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax;
+     * - SQLSTATE[42S02]: Base table or view not found: 1146 Table 'calendar.the_ev' doesn't exist
+     * - SQLSTATE[42S22]: Column not found: 1054 Unknown column 'dddescription'
      */
-    public static function delete($table, array $whereConds = [])
+    public static function delete($table, $whereConds = [])
     {
 
         $pdo = self::getConnection();
-        $stmt = 'delete from ' . $table;
+        $query = 'delete from ' . $table;
         $markers = [];
-        self::addWhereSubStmt($whereConds, $stmt, $markers);
-        self::$stmt = $stmt;
-        $query = $pdo->prepare($stmt);
-        if (true === $query->execute($markers)) {
-            return $query->rowCount();
+        self::addWhereSubStmt($whereConds, $query, $markers);
+        self::$query = $query;
+        $stmt = $pdo->prepare($query);
+        if (true === $stmt->execute($markers)) {
+            return $stmt->rowCount();
         }
+        self::handleStatementErrors($stmt, 'delete');
         return false;
     }
 
 
     /**
      * Returns false|array
+     *
+     * Common errors are:
+     * - SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax;
+     * - SQLSTATE[42S02]: Base table or view not found: 1146 Table 'calendar.the_ev' doesn't exist
+     * - SQLSTATE[42S22]: Column not found: 1054 Unknown column 'dddescription'
      */
-    public static function fetchAll($stmt, array $markers = [])
+    public static function fetchAll($query, array $markers = [], $fetchStyle = null)
     {
         $pdo = self::getConnection();
-        self::$stmt = $stmt;
-        $query = $pdo->prepare($stmt);
-        if (true === $query->execute($markers)) {
-            return $query->fetchAll(\PDO::FETCH_ASSOC);
+        self::$query = $query;
+        $stmt = $pdo->prepare($query);
+        if (true === $stmt->execute($markers)) {
+            return $stmt->fetchAll((null !== $fetchStyle) ? $fetchStyle : self::$fetchStyle);
         }
+        self::handleStatementErrors($stmt, 'fetchAll');
         return false;
     }
 
 
     /**
      * Returns false|array
+     *
+     * Common errors are:
+     * - SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax;
+     * - SQLSTATE[42S02]: Base table or view not found: 1146 Table 'calendar.the_ev' doesn't exist
+     * - SQLSTATE[42S22]: Column not found: 1054 Unknown column 'dddescription'
      */
-    public static function fetch($stmt, array $markers = [])
+    public static function fetch($query, array $markers = [], $fetchStyle = null)
     {
         $pdo = self::getConnection();
-        self::$stmt = $stmt;
-        $query = $pdo->prepare($stmt);
-        if (true === $query->execute($markers)) {
-            return $query->fetch(\PDO::FETCH_ASSOC);
+        self::$query = $query;
+        $stmt = $pdo->prepare($query);
+        if (true === $stmt->execute($markers)) {
+            return $stmt->fetch((null !== $fetchStyle) ? $fetchStyle : self::$fetchStyle);
         }
+        self::handleStatementErrors($stmt, 'fetch');
         return false;
     }
 
@@ -195,17 +284,39 @@ class QuickPdo
      * Executes a PDO->exec and returns the number of affected lines.
      *
      * @return false|int, the number of affected rows
+     *
+     *
+     * Common errors:
+     * - SQLSTATE[42000]: Syntax error or access violation: 1049 Unknown database 'pou'
+     *
      */
-    public static function freeExec($stmt)
+    public static function freeExec($query)
     {
         $pdo = self::getConnection();
-        self::$stmt = $stmt;
-        if (false !== $r = $pdo->exec($stmt)) {
+        self::$query = $query;
+        if (false !== $r = $pdo->exec($query)) {
             return $r;
         }
+        self::handleConnectionErrors($pdo, 'freeExec');
         return false;
     }
 
+
+    /**
+     * Execute a PDOStatement->execute and returns it.
+     * @return false|\PDOStatement
+     */
+    public static function freeQuery($query, array $markers = [])
+    {
+        $pdo = self::getConnection();
+        self::$query = $query;
+        $stmt = $pdo->prepare($query);
+        if (true === $stmt->execute($markers)) {
+            return $stmt;
+        }
+        self::handleStatementErrors($stmt, 'freeStmt');
+        return false;
+    }
 
     /**
      * Execute a PDOStatement->execute and returns the number of affected rows.
@@ -213,59 +324,56 @@ class QuickPdo
      *
      * @return false|int, the number of affected rows
      */
-    public static function freeStmt($stmt, array $markers = [])
+    public static function freeStmt($query, array $markers = [])
     {
         $pdo = self::getConnection();
-        self::$stmt = $stmt;
-        $query = $pdo->prepare($stmt);
-        if (true === $query->execute($markers)) {
-            return $query->rowCount();
+        self::$query = $query;
+        $stmt = $pdo->prepare($query);
+        if (true === $stmt->execute($markers)) {
+            return $stmt->rowCount();
         }
+        self::handleStatementErrors($stmt, 'freeStmt');
         return false;
     }
 
+    //------------------------------------------------------------------------------/
+    // 
+    //------------------------------------------------------------------------------/
+    public static function getErrors()
+    {
+        return self::$errors;
+    }
+
+    public static function getLastError()
+    {
+        return self::$errors[count(self::$errors) - 1];
+    }
 
 
+    public static function getQuery()
+    {
+        return self::$query;
+    }
 
     //------------------------------------------------------------------------------/
     //
     //------------------------------------------------------------------------------/
-    private static function addWhereSubStmt($whereConds, &$stmt, array &$markers)
+    private static function addWhereSubStmt($whereConds, &$query, array &$markers)
     {
-        if (is_array($whereConds)) {
-            if ($whereConds) {
+        QuickPdoStmtTool::addWhereSubStmt($whereConds, $query, $markers);
+    }
 
-                $mkCpt = 0;
-                $mk = 'bzz_';
-                $stmt .= ' where ';
-                $first = true;
-                foreach ($whereConds as $cond) {
-                    if (is_array($cond)) {
-                        list($field, $op, $val) = $cond;
-                        $val2 = (isset($cond[3])) ? $cond[3] : null;
-                        if (true === $first) {
-                            $first = false;
-                        }
-                        else {
-                            $stmt .= ',';
-                        }
-                        $stmt .= $field . ' ' . $op . ' :' . $mk . $mkCpt;
-                        $markers[':' . $mk . $mkCpt] = $val;
-                        $mkCpt++;
-                        if ('between' === $op) {
-                            $stmt .= ' and ' . ' :' . $mk . $mkCpt;
-                            $markers[':' . $mk . $mkCpt] = $val2;
-                            $mkCpt++;
-                        }
-                    }
-                    elseif (is_string($cond)) {
-                        $stmt .= $cond;
-                    }
-                }
-            }
+    private static function handleStatementErrors(\PDOStatement $stmt, $methodName)
+    {
+        if (0 !== (int)$stmt->errorInfo()[1]) {
+            self::$errors[] = array_merge($stmt->errorInfo(), [$methodName]);
         }
-        elseif (is_string($whereConds)) {
-            $stmt .= ' where ' . $whereConds;
+    }
+
+    private static function handleConnectionErrors(\PDO $conn, $methodName)
+    {
+        if (0 !== (int)$conn->errorInfo()[1]) {
+            self::$errors[] = array_merge($conn->errorInfo(), [$methodName]);
         }
     }
 }

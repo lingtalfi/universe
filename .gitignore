@@ -1,13 +1,8 @@
-.git
-.gitignore
 .DS_Store
+.gitignore
+.git/
+.git2/
 .idea/
+README.md
 private/
-www/
-*.pending.*
-*.depr.*
-planets/
-
-
-# 
 

@@ -1,20 +1,10 @@
-### Disclaimer (2015-10-14)
-
-The 
-[universe](https://github.com/lingtalfi/universe/) 
-has collapsed, and was reborn, its components are dispatched all over the place, expanding.
-
-This BumbleBee package is a dead copy of the 
-[new BumbleBee package](https://github.com/lingtalfi/BumbleBee/tree/master/Autoload)
-
-
 Butineur Autoloader
 =========================
 2015-10-05
 
 
 
-This is a simple [BSR-0] (https://github.com/lingtalfi/universe/blob/master/planets/BumbleBee/Autoload/convention.bsr0.eng.md)
+This is a simple [BSR-0] (https://github.com/lingtalfi/BumbleBee/blob/master/Autoload/convention.bsr0.eng.md)
 autoloader for any php project.
 
 
@@ -28,6 +18,9 @@ This should be done once at the beginning of your application's life (in a file 
 
 
 ```php
+
+use BumbleBee\Autoload\ButineurAutoloader;
+
 // a good place for those lines would be the init script of your application
 require_once __DIR__ . '/classes/BeeAutoloader.php';
 require_once __DIR__ . '/classes/ButineurAutoloader.php';
@@ -63,4 +56,4 @@ in a matter of **two lines of code!**.
 
 
 
-For another concrete example, please look in the [BSR-0 convention file] (https://github.com/lingtalfi/universe/blob/master/planets/BumbleBee/Autoload/convention.bsr0.eng.md).
+For another concrete example, please look in the [BSR-0 convention file] (https://github.com/lingtalfi/BumbleBee/blob/master/Autoload/convention.bsr0.eng.md).

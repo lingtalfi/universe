@@ -150,7 +150,7 @@ Deeper inside features
 More about quotes
 ------------------------
 
-For quotes, BabyYaml embraces the nomenclature described in [QuotesEscaping modes](https://github.com/lingtalfi/universe/blob/master/planets/ConventionGuy/convention.quotesEscapingModes.eng.md). 
+For quotes, BabyYaml embraces the nomenclature described in [QuotesEscaping modes](https://github.com/lingtalfi/ConventionGuy/blob/master/convention.quotesEscapingModes.eng.md). 
 
 BabyYaml considers two types of string:
 
@@ -158,7 +158,7 @@ BabyYaml considers two types of string:
 - hybrid            (any string that is not protected, basically)
 
 
-To escape inner quotes, BabyYaml use the [simple backslash escape](https://github.com/lingtalfi/universe/blob/master/planets/ConventionGuy/convention.quotesEscapingModes.eng.md) mechanism.
+To escape inner quotes, BabyYaml use the [simple backslash escape](https://github.com/lingtalfi/ConventionGuy/blob/master/convention.quotesEscapingModes.eng.md) mechanism.
 
 
 
@@ -179,7 +179,7 @@ a([true => 45] ); // 1 => 45
 As we can see, there is nothing very interesting here.
 That's why special values in keys are treated like simple strings in BabyYaml. 
 
-Note: the a function comes from the [bigbang.php](https://github.com/lingtalfi/universe/blob/master/planets/TheScientist/bigbang/bigbang.php) script.
+Note: the a function comes from the [bigbang.php](https://github.com/lingtalfi/TheScientist/blob/master/bigbang/bigbang.php) script.
 
 
 

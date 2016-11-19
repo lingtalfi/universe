@@ -1,14 +1,3 @@
-### Disclaimer (2015-10-14)
-
-The 
-[universe](https://github.com/lingtalfi/universe/) 
-has collapsed, and was reborn, its components are dispatched all over the place, expanding.
-
-This CommandLineManiac package is a dead copy of the 
-[new CommandLineManiac package](https://github.com/lingtalfi/CommandLineManiac)
-
-
-
 CommandLineManiac
 ====================
 2015-10-04

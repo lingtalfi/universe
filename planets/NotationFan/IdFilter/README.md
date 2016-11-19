@@ -1,21 +1,10 @@
-### Disclaimer (2015-10-14)
-
-The 
-[universe](https://github.com/lingtalfi/universe/) 
-has collapsed, and was reborn, its components are dispatched all over the place, expanding.
-
-This IdFilter package is a dead copy of the 
-[new IdFilter package](https://github.com/lingtalfi/NotationFan/tree/master/IdFilter)
-
-
-
 Id Filter
 ========================
 2015-10-06
 
 
 
-This is an implementation of the [idFilter notation](https://github.com/lingtalfi/universe/blob/master/planets/NotationFan/IdFilter/notation.idFilter.eng.md).<br>
+This is an implementation of the [idFilter notation](https://github.com/lingtalfi/NotationFan/blob/master/IdFilter/notation.idFilter.eng.md).<br>
 This notation might be useful if you want to select a subset of numbers from a given set of numbers.<br>
 
 As a concrete example, I used this class while creating a moderating command line tool.<br>
@@ -54,7 +43,7 @@ foreach ($strings as $s) {
 
 
 Note, for this script, 
-I used the [bigbang](https://github.com/lingtalfi/universe/blob/master/planets/TheScientist/convention.portableAutoloader.eng.md)
+I used the [bigbang](https://github.com/lingtalfi/TheScientist/blob/master/convention.portableAutoloader.eng.md)
 autoloader (which contains the a function). 
 
 

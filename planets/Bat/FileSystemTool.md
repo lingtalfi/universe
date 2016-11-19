@@ -7,7 +7,7 @@ FileSystemTool
 This class contains functions for manipulating the filesystem.
 
 Note: 
-some examples use the a function, which comes from the [bigbang technique]( https://github.com/lingtalfi/universe/blob/master/planets/TheScientist/convention.portableAutoloader.eng.md ).
+some examples use the a function, which comes from the [bigbang technique]( https://github.com/lingtalfi/TheScientist/blob/master/convention.portableAutoloader.eng.md ).
 If you don't use bigbang, you can use var_dump as a replacement.
 
 
@@ -32,7 +32,67 @@ If you set the throwEx flag to false, then this method will return true in case 
 and false in case of failure.
      
      
+
+copyDir
+-------------     
+2015-10-20
+
+```php
+bool        copyDir ( str:srcDir, str:targetDir, bool:preservePerms = false, array:&errors = [] )
+```
      
+Copies a directory (recursively) to a given location.
+
+     
+existsUnder
+-------------     
+2015-10-27
+
+```php
+bool        existsUnder ( str:file, str:dir )
+```
+     
+     
+Returns true only if:
+
+- dir exists
+- file exists and is located under the dir
+
+This method automatically resolves paths (things like ../../ are being resolved) before executing the test.
+This method comes handy when you want to check for a path that comes from an (untrusted) user.
+
+
+
+
+fileGenerator
+-------------     
+2016-02-13
+
+```php
+callable:generator      fileGenerator ( str:file, bool:ignoreTrailingNewLines=true )
+```
+     
+Returns a generator function, which can iterate over the lines of the given file.
+
+
+### Example
+
+```php
+
+$f = "/path/to/data.txt";
+$gen = FileSystemTool::fileGenerator($f);
+foreach ($gen() as $v) {
+    a($v);
+}
+
+```
+
+
+filePerms
+------------
+2015-11-04
+     
+See [PermTool::filePerms](https://github.com/lingtalfi/Bat/blob/master/PermTool.md#fileperms)
      
      
 
@@ -46,19 +106,7 @@ string    getFileExtension ( string:file )
 ```
 
 Returns the extension of a file which path is given.
-The behaviour of this method is described by the following table:
-
-
-filename      |      extension returned
-------------  | --------------------
-hello.txt            |  txt
-hello.tXT            |  tXT
-hello.tar.gz         |  gz
-.htaccess            |  \<empty string>
-.htaccess.tar.gz     |  gz
-hello                |  \<empty string>
-.                    |  \<empty string>
-..                   |  \<empty string>
+The extension in this [fileName nomenclature](https://github.com/lingtalfi/ConventionGuy/blob/master/nomenclature.fileName.eng.md)
 
 
 
@@ -66,6 +114,42 @@ hello                |  \<empty string>
 $f = '/path/to/myfile.jpg';
 a(FileSystemTool::getFileExtension($f)); // jpg
 ```
+     
+     
+
+getFileName
+-----------
+2015-10-25
+
+
+```php
+string    getFileName ( string:file )
+```
+
+Returns the [file name](https://github.com/lingtalfi/ConventionGuy/blob/master/nomenclature.fileName.eng.md)
+of a file which path is given.
+
+
+
+```php
+$f = '/path/to/myfile.jpg';
+a(FileSystemTool::getFileName($f)); // myfile
+```
+ 
+     
+
+getFileSize
+-----------
+2015-10-25
+
+
+```php
+int|false    getFileSize ( string:file )
+```
+
+Returns the size in bytes of a given file.
+The file can be an url starting with http:// https://, or a filesystem file.
+
 
 
 
@@ -83,7 +167,6 @@ This does basically the same job as php's [mkdir](http://php.net/manual/en/funct
 but the difference is that the FileSystemTool::mkdir method
 returns false if the dir couldn't be created, and true if the
 dir could be created or already existed.
-No warning is triggered if a problem occurs.
 
 This behaviour allows us to write compact and flexible code:
 
@@ -106,7 +189,69 @@ if (FileSystemTool::mkdir($dir)) {
 ```
  
 
-More info about [bigbang oneliner here]( https://github.com/lingtalfi/universe/blob/master/planets/TheScientist/convention.portableAutoloader.eng.md ).
+More info about [bigbang oneliner here]( https://github.com/lingtalfi/TheScientist/blob/master/convention.portableAutoloader.eng.md ).
+
+
+
+mkdirDone
+-----------
+2015-10-17
+
+
+```php
+bool    mkdirDone ( string:pathName, octal:mode = 0777, bool:recursive = false, resource:context? )
+```
+
+
+This does basically the same job as php's [mkdir](http://php.net/manual/en/function.mkdir.php) function (it also has the same signature by the way), 
+but the difference is that the FileSystemTool::mkdirDone method
+throws an exception if the dir couldn't be created, and true if the
+dir could be created or already existed.
+
+This behaviour allows us to write a one liner:
+
+
+```php
+
+FileSystemTool::mkdirDone($dir);
+// here we know for sure that the dir $dir exists
+```
+
+
+
+
+
+mkfile
+-----------
+2015-12-15
+
+
+```php
+bool    mkfile ( str:pathName, str:data="", octal:dirMode = 0777 )
+```
+
+Creates a file, and the intermediary directories if necessary
+Returns true if the file exists when the method has been executed.
+Returns false if the file couldn't be created.
+
+
+### Example
+
+```php
+<?php
+
+
+use Bat\FileSystemTool;
+
+require_once "bigbang.php";
+
+
+$f = "/tmp/do/re/mi.txt";
+a(FileSystemTool::mkfile($f, "hello"));
+
+
+```
+
 
 
 

@@ -5,6 +5,9 @@ namespace Bat;
 /*
  * LingTalfi 2015-10-07
  */
+use CopyDir\AuthorCopyDirUtil;
+use DirScanner\DirScanner;
+
 class FileSystemTool
 {
 
@@ -41,19 +44,58 @@ class FileSystemTool
 
 
     /**
-     * Returns the file extension:
+     * Copies a directory to a given location.
+     */
+    public static function copyDir($src, $target, $preservePerms = false, &$errors = [])
+    {
+        $o = AuthorCopyDirUtil::create();
+        $o->setPreservePerms($preservePerms);
+        $ret = $o->copyDir($src, $target);
+        $errors = $o->getErrors();
+        return $ret;
+    }
+
+
+    /**
+     * Returns true only if:
+     * - dir exists
+     * - file exists and is located under the dir
      *
-     * hello.txt            -> txt
-     * hello.tXT            -> tXT
-     * hello.tar.gz         -> gz
-     * .htaccess            -> <empty string>
-     * .htaccess.tar.gz     -> gz
-     * hello                -> <empty string>
+     */
+    public static function existsUnder($file, $dir)
+    {
+        if (false !== $rDir = realpath($dir)) {
+            if (false !== $rFile = realpath($file)) {
+                return ($rDir === substr($rFile, 0, strlen($rDir)));
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * Gets file permissions.
      *
+     * Returns:
+     * - false in case of failure
+     * - if true === unix, str:permissions       ( -rw-r--r-- )
+     * - if false === unix, str:permissions      ( 1777, 0644, ...)
+     *
+     */
+    public static function filePerms($file, $unix = true)
+    {
+        return PermTool::filePerms($file, $unix);
+    }
+
+
+    /**
+     * Returns the file extension as defined here: https://github.com/lingtalfi/ConventionGuy/blob/master/nomenclature.fileName.eng.md
+     * @return string
      */
     public static function getFileExtension($file)
     {
         if (is_string($file)) {
+            $file = basename($file);
             if ('.' === $file[0]) {
                 if ('.' === $file) {
                     return '';
@@ -67,6 +109,86 @@ class FileSystemTool
         return pathinfo($file, PATHINFO_EXTENSION);
     }
 
+    /**
+     * Returns the file name as defined here: https://github.com/lingtalfi/ConventionGuy/blob/master/nomenclature.fileName.eng.md
+     * The file name without the last extension.
+     */
+    public static function getFileName($file)
+    {
+        if (is_string($file)) {
+            $file = basename($file);
+            if ('.' === $file[0]) {
+                $p = explode('.', $file);
+                if (count($p) > 2) {
+                    array_pop($p);
+                }
+                return implode('.', $p);
+            }
+        }
+        else {
+            throw new \InvalidArgumentException(sprintf("file argument must be of type string, %s given", gettype($file)));
+        }
+        return pathinfo($file, PATHINFO_FILENAME);
+    }
+
+
+    /**
+     * Returns the size in bytes of a given file.
+     * The file can be an url starting with http:// https://, or a filesystem file.
+     *
+     * @return int|false in case of failure (file not existing for instance)
+     */
+    public static function getFileSize($file)
+    {
+
+        if (
+            'http://' === substr($file, 0, 7) ||
+            'https://' === substr($file, 0, 8)
+        ) {
+            if (true === extension_loaded('curl')) {
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $file);
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_HEADER, true);
+                curl_setopt($ch, CURLOPT_NOBODY, true);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 10); // mitigate slowloris attacks http://php.net/manual/en/function.get-headers.php#117189
+                curl_exec($ch);
+                return (int)curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+            }
+            else {
+                $head = array_change_key_case(get_headers($file, 1));
+                return (int)$head['content-length'];
+            }
+        }
+        else {
+            return filesize($file);
+        }
+    }
+
+
+    /**
+     * Returns a generator function, which can iterate over the lines of the given file.
+     */
+    public static function fileGenerator($file, $ignoreTrailingNewLines = true)
+    {
+        return function () use ($file, $ignoreTrailingNewLines) {
+            $f = fopen($file, 'r');
+            try {
+                while ($line = fgets($f)) {
+                    if (true === $ignoreTrailingNewLines) {
+                        yield rtrim($line, PHP_EOL);
+                    }
+                    else {
+                        yield $line;
+                    }
+                }
+            } finally {
+                fclose($f);
+            }
+        };
+    }
+
 
     /**
      *
@@ -76,11 +198,15 @@ class FileSystemTool
      * bool mkdir ( string $pathname [, int $mode = 0777 [, bool $recursive = false [, resource $context ]]] )
      *
      *
-     * It is considered a success when the dir exists and is a dir (not a file or a link).
+     * It is considered a success when the dir exists and is a dir (not a file or a link),
+     *      and there were no permissions errors.
+     *
      * It is considered a failure otherwise.
      *
      *
      * This method returns true in case of success, and false in case of failure.
+     * If a link or a file resides at the location where you want to create the dir, this
+     * method will not try to remove the existing link or file and will fail.
      *
      */
     public static function mkdir($pathName, $mode = 0777, $recursive = false)
@@ -92,6 +218,61 @@ class FileSystemTool
             return mkdir($pathName, $mode, $recursive, func_get_args()[3]);
         }
         return mkdir($pathName, $mode, $recursive);
+    }
+
+
+    /**
+     *
+     * Ensures that a directory exists, or throws an exception if something wrong happens.
+     *
+     * It uses the same arguments as the php native mkdir function.
+     * bool mkdir ( string $pathname [, int $mode = 0777 [, bool $recursive = false [, resource $context ]]] )
+     *
+     *
+     * It is considered a success when the dir exists and is a dir (not a file or a link),
+     *      and there were no permissions errors.
+     *
+     * It is considered a failure otherwise.
+     *
+     *
+     * This method returns true in case of success, and false in case of failure.
+     * If a link or a file resides at the location where you want to create the dir, this
+     * method will not try to remove the existing link or file and will fail.
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public static function mkdirDone($pathName, $mode = 0777, $recursive = true)
+    {
+        if (4 === func_num_args()) {
+            $ret = mkdir($pathName, $mode, $recursive, func_get_args()[3]);
+        }
+        else {
+            $ret = mkdir($pathName, $mode, $recursive);
+        }
+        if (false === $ret) {
+            throw new \Exception("Could not make dir $pathName");
+        }
+        return true;
+    }
+
+
+    /**
+     *
+     * Creates a file, and the intermediary directories if necessary.
+     *
+     * @return bool,
+     *      true if the file exists when the method has been executed
+     *      false if the file couldn't be created
+     */
+    public static function mkfile($pathName, $data = '', $dirMode = 0777)
+    {
+        if (true === FileSystemTool::mkdir(dirname($pathName), $dirMode, true)) {
+            if (false !== file_put_contents($pathName, $data)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
