@@ -20,9 +20,13 @@ What are the new methods?
 ------------------------
 
 - [getAutoIncrementedField](https://github.com/lingtalfi/QuickPdo/blob/master/QuickPdoInfoTool.md#getautoincrementedfield)
+- [getColumnDataTypes](https://github.com/lingtalfi/QuickPdo/blob/master/QuickPdoInfoTool.md#getcolumndatatypes)
+- [getColumnDefaultValues](https://github.com/lingtalfi/QuickPdo/blob/master/QuickPdoInfoTool.md#getcolumndefaultvalues)
 - [getColumnNames](https://github.com/lingtalfi/QuickPdo/blob/master/QuickPdoInfoTool.md#getcolumnnames)
+- [getColumnNullabilities](https://github.com/lingtalfi/QuickPdo/blob/master/QuickPdoInfoTool.md#getcolumnnullabilities)
 - [getDatabase](https://github.com/lingtalfi/QuickPdo/blob/master/QuickPdoInfoTool.md#getdatabase)
 - [getDriver](https://github.com/lingtalfi/QuickPdo/blob/master/QuickPdoInfoTool.md#getdriver)
+- [getPrimaryKey](https://github.com/lingtalfi/QuickPdo/blob/master/QuickPdoInfoTool.md#getprimarykey)
 - [getTables](https://github.com/lingtalfi/QuickPdo/blob/master/QuickPdoInfoTool.md#gettables)
 
  
@@ -95,6 +99,40 @@ Return the name of the auto-incremented field, or false if there is none.
 
 
 
+getColumnDataTypes
+-------------
+2016-11-24
+
+
+```php
+array|false    getColumnDataTypes ( str:table, bool:precision=false )
+```
+
+Return the data types of the given table's columns, in the form of an array of columnName => dataType.
+If the precision parameter is false (default), data types which accept precision are returned in their 
+symbolic form (i.e. varchar, tinyint, ...).
+
+If the precision parameter is set to true, the precision suffix is returned, like varchar(64), tinyint(1) for instance. 
+  
+Return false in case of failure.
+
+
+
+getColumnDefaultValues
+-------------
+2016-11-24
+
+
+```php
+array|false    getColumnDefaultValues ( str:table )
+```
+
+Return the default values associated with the given table's columns (array of column => default value).
+
+Return false in case of failure.
+
+
+
 getColumnNames
 -------------
 2015-12-28
@@ -106,6 +144,24 @@ array|false    getColumnNames ( str:table, str:schema=null )
 
 Return the column names of a given table.
 Return false in case of failure.
+
+
+
+
+getColumnNullabilities
+-------------
+2016-12-01
+
+
+```php
+array|false    getColumnNullabilities ( str:table )
+```
+
+
+Return an array of column name => nullability (boolean indicating whether or the column accepts null values)
+
+Return false in case of failure.
+
 
 
 getDatabase
@@ -130,6 +186,18 @@ string    getDriver ( )
 ```
 
 Return the driver (mysql for instance) from the existing connection
+
+
+getPrimaryKey
+-------------
+2016-11-24
+
+
+```php
+array    getPrimaryKey ( str:table, str:schema=null )
+```
+
+Return an array containing the column(s) in the primary key.
 
 
 getForeignKeysInfo

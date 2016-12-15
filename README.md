@@ -1,115 +1,132 @@
-Universe
-================
-2015-10-03 -- 2016-11-19
-
-
-library of php classes.
+Universe snapshot
+=====================
+2016-01-02 -- 2016-11-25
 
 
 
-The metaphor
+Personal collection of multi-purpose php classes.
+
+
+
+
+Features
+---------------
+
+- one liner setup 
+- unified naming convention based on psr-0 for all the classes
+
+
+
+Metaphor
+-------------
+
+The sum of all universes is called multi-verse.
+A developer creates her own universe(s).
+Each universe consists of a collection of classes called planets.
+
+
+
+
+Guide for the new developer
+-------------------
+
+Here are the few guidelines I can think of:
+
+- Every planet should be named using the [BSR-0](https://github.com/lingtalfi/BumbleBee/blob/master/Autoload/convention.bsr0.eng.md) naming convention
+
+
+
+
+Installation
 -----------------
 
-In the universe, new planets are created, some other are destroyed, and sometimes we have weird things like black holes.
-
-There can be multiple universes, and altogether they form what I call the multiverse, which is the biggest thing ever.
-
-Each universe has its own form and evolves at its own pace.
-
-
-Okay, now let's dive in.
-
-
-A universe is just a set of php classes owned by one developer.
-
-How the set is organized is purely a matter of taste.
-
-A planet is a php class.
-
-And so, this repo is basically my universe (or one of my universe should I say).
-
-I put it here with the intention of accessing it from anywhere (assuming an internet connection, that is).
-
-
-What is for you?
---------------------
-
-If you stumble upon this repo, hooray, you can use it too.
-
-I'll confess that what follows is not for me, because I know how my universe work and I don't need no documentation, but rather for an imaginary you.
-
-
-So here is my tutorial for you, I'll assume that you know php and the [autoloading](http://php.net/manual/en/language.oop5.autoload.php) system, and that you know [composer](https://getcomposer.org/) and [PSR-0](http://www.php-fig.org/psr/psr-0/).
-
-
-Tutorial
-------------
-
-To install the universe, clone this repo where you want.
+First, clone (or download) the universe where you want.
 
 ```bash
-git clone <theUniverseUrl>
+cd /path/to/where/you/want/to/install
+git clone https://github.com/karayabin/universe-snapshot.git
 ```
 
-I generally have only one repo per machine, but it's also possible to import it on a per application basis.
+
+You will end up with a universe-snapshots directory with the following structure:
 
 
-When the cloning is over, you'll end up with a planets directory, and a bigbang.php file.
+- universe-snapshots/
+    - bigbang.php
+    - planets/
 
 
-```txt
-- bigbang.php
-- planets/
-```
-
-Include the bigbang.php script and you're done, basically (i.e. you can use any planet).
-
-The bigbang.php script and the planets dir should be one next to each other.
-
-If you decide to do otherwise, then you should edit the bigbang.php file.
-
-
-Now, there are a few more important things.
-
-
-Every planet uses the [BSR-0](https://github.com/lingtalfi/BumbleBee/blob/master/Autoload/convention.bsr0.eng.md) naming convention, which is a simpler verson of PSR-0 (i.e. no special treatment on the old underscore cased classes).
-
-
-From there, you are free to go where you want (if you want to create your own planets).
+Now that the universe is on your machine, you can use it.
 
 
 Bigbang
------------
+------------------------------------------
 
-The bigbang is the entry point of an universe.
+Bigbang is the name of the script that starts the universe.
 
-You should totally read the ligthweight source code of the universe.
-
-Basically, you get two bonus functions for free:
-
-- a: an alias for a better version of var_dump
-- az: same as a, but followed by an exit statement
+If you want to use a planet (class) from the universe in your application, you need to call the bigbang script, once.
+ 
+There are two ways to call the bigbang, the portable way (recommended), and the hard link way.
 
 
-Those are incredibly useful, believe me.
+### Portable bigbang
 
-I mean, the only constant in development is that you will encounter bugs,
-almost every time, like steps in a stair.
+Put the universe directory (universe-snapshots) in the include_path directive of your php ini.
+Note that in this case you only need to do this once per machine (one universe per machine). 
 
-So debugging is important, and typing var_dump is just a pain in the butt compared to typing just a.
+Then put the following line at the beginning of your application (probably an init file):
 
-But that's just the bonus part of the bigbang.php script.
+```php
+require_once "bigbang.php";
+```
 
-The main purpose of the bigbang.php script is to autoload the php classes.
+Done! from now on, any planet is available to you.
 
-By default, it loads the classes in the planets directory.
+This is the recommended solution, because when you upload your app to another machine with the universe setup (in the php ini's include_path),
+then you don't need to change the path to the bigbang script in your application.
 
-But you can add any number of directories.
 
-For instance, if in a typical web application, I always have a "class" directory where I put all my app specific classes.
 
-Then in my init, I will do this:
+### hard link bigbang
 
+The other way is simply to include the bigbang file wherever it is:
+
+```php
+require_once "/path/to/bigbang.php";
+```
+
+
+
+
+In either cases, to use a class in your project, just call it:
+
+
+```php
+// Note: most IDE will generate this line for you as you type the other line below...
+use My\Awesome\MegaClass;
+
+// ...therefore in most cases you just need to type this line (and this IDE mechanism is a huge time saver by the way)
+$translator = new MegaClass();
+```
+
+
+
+### adding your own classes
+
+When creating a php application, using my universe collection can be helpful,
+but at some point you always need to create your own classes.
+
+
+The good news is that the universe is easily expandable.
+
+Start by creating a class directory in your project and put all your classes in there (using the BSR-0 naming convention).
+
+```bash
+cd /my/app
+mkdir class
+```
+
+Then, you need to revisit the bigbang one liner setup, and turn it into this:
 
 ```php
 $__butineurStart = false; 
@@ -120,45 +137,38 @@ ButineurAutoloader::getInst()
 ->start();
 ```
 
+We use the **$__butineurStart** variable to tell the bigbang.php script that we will start the universe manually.
 
-Don't be scared, it's not complicated.
-
-The **$__butineurStart** variable tells the bigbang.php script that we want to load some classes manually.
-
-Then we call the bigbang script. 
-
-I like to put it in my php.ini (include_path directive), so that I can just call the bigbang from anywhere on the machine without worrying of the actual path (it's more portable).
-
-
-Then we use the ButineurAutoloader class to register the directories where the autoload mechanism should look inside of.
-
-The last thing we do is call the "start" method, which actually launches the php autoloading mechanism (via spl_autoload_register).
+Then we add our own dependencies (the **class** directory), and call the start method when ready.
 
 
 
-So hopefully you will find that the bigbang.php script is ridiculously simple, and understand that loading a class is not the problem anymore.
+### Bigbang bonus: a and az debug functions
+
+If you look inside the bigbang.php script, you will see that there are two functions definitions at the end: a and az.
 
 
-Now, the important thing is: what will be your universe? 
+
+**a** is basically an alias for var_dump, since it's probably the function I use the most in php.
+
+**az** does the same, plus it exits the current script.
+
+I can't emphasize enough how much time those two aliases cut the debug time.
 
 
+Anyway, if you don't use them, you can throw them away, no big deal.
 
 
 
 
 
 
-Related
------------------
 
-- https://github.com/karayabin/universe-snapshot: universes snapshots
+Final words
+------------------
 
-Note: this current repo and the **universe-snapshot** repo do basically the same things, but
-it's more convenient for me to upload to this current repo, so it will be updated more often.
-
-
-
-
+Well, that's the end of the party.
+See you next time (this paragraph is ridiculously useless and should have been deleted). 
 
 
 

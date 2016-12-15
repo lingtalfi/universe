@@ -46,3 +46,39 @@ a(UriTool::appendQueryString('/home', ['template' => 'yellow', 'user' => 'me']))
 
 
 
+fileGetContents
+-----------
+2016-12-02
+
+
+```php
+str|false    fileGetContents ( string:url )
+```
+
+Get the contents of a given url, or return false if it cannot be accessed.
+
+Will try differents methods:
+ 
+- file_get_contents if the php allow_url_fopen directive allows it
+- or curl if installed
+
+
+
+
+
+
+getWebsiteAbsoluteUrl
+-----------
+2016-11-26
+
+
+```php
+str|false    getWebsiteUrl ( )
+```
+
+Gets the absolute url for a website. Useful when you need to redirect a page using the php header function.
+
+
+
+
+

@@ -30,10 +30,45 @@ class QuickPdoInfoTool
         }
 
         if (false !== ($rows = QuickPdo::fetchAll("show columns from $table where extra='auto_increment'"))) {
-            return $rows[0]['Field'];
+            if (array_key_exists(0, $rows)) {
+                return $rows[0]['Field'];
+            }
         }
         return false;
     }
+
+
+    public static function getColumnDataTypes($table, $precision = false)
+    {
+        $types = [];
+        $info = QuickPdo::fetchAll("SHOW COLUMNS FROM $table");
+        if (false !== $info) {
+            foreach ($info as $_info) {
+                $type = $_info['Type'];
+                if (false === $precision) {
+                    $type = explode('(', $type, 2)[0];
+                }
+                $types[$_info['Field']] = $type;
+            }
+            return $types;
+        }
+        return false;
+    }
+
+
+    public static function getColumnDefaultValues($table)
+    {
+        $defaults = [];
+        $info = QuickPdo::fetchAll("SHOW COLUMNS FROM $table");
+        if (false !== $info) {
+            foreach ($info as $_info) {
+                $defaults[$_info['Field']] = $_info['Default'];
+            }
+            return $defaults;
+        }
+        return false;
+    }
+
 
 
     public static function getColumnNames($table, $schema = null)
@@ -73,13 +108,27 @@ AND TABLE_NAME=:table;
     }
 
 
+    public static function getColumnNullabilities($table)
+    {
+        $defaults = [];
+        $info = QuickPdo::fetchAll("SHOW COLUMNS FROM $table");
+        if (false !== $info) {
+            foreach ($info as $_info) {
+                $defaults[$_info['Field']] = ('YES' === $_info['Null']) ? true : false;
+            }
+            return $defaults;
+        }
+        return false;
+    }
+
+
+
     public static function getDatabase()
     {
         if ('mysql' === self::getDriver()) {
             // http://stackoverflow.com/questions/9322302/how-to-get-database-name-in-pdo
             return QuickPdo::freeQuery("select database()")->fetchColumn();
-        }
-        else {
+        } else {
             throw new QuickPdoException("The getDatabase method doesn't support the " . self::getDriver() . " driver");
         }
     }
@@ -125,6 +174,22 @@ and CONSTRAINT_TYPE = 'FOREIGN KEY'
     }
 
 
+    public static function getPrimaryKey($table, $schema = null)
+    {
+        if (null === $schema) {
+            $schema = self::getDatabase();
+        }
+        $rows = QuickPdo::fetchAll("SHOW KEYS FROM $schema.$table WHERE Key_name = 'PRIMARY'");
+        $ret = [];
+        if (false !== $rows) {
+            foreach ($rows as $info) {
+                $ret[] = $info['Column_name'];
+            }
+        }
+        return $ret;
+    }
+
+
     public static function getTables($db)
     {
         QuickPdo::freeExec("use $db;");
@@ -142,4 +207,6 @@ and CONSTRAINT_TYPE = 'FOREIGN KEY'
         }
         return false;
     }
+
+
 }
