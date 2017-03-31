@@ -1,6 +1,6 @@
 Bat
 ==========
-2015-10-07
+2015-10-07 --> 2017-03-24
 
 
 ![Basic Tools](http://s18.postimg.org/qhu0b9g5l/bat_web.jpg "Basic Tools")
@@ -26,15 +26,18 @@ So far, the Bat library is composed of the following tools:
 Tools       |       Description
 ----------- | -----------------------
 [ArrayTool]( https://github.com/lingtalfi/Bat/blob/master/ArrayTool.md )          |       Tools for manipulating arrays
-[CaseTool]( https://github.com/lingtalfi/Bat/blob/master/CaseTool.md )          |       Tools for for converting a case to another
+[CaseTool]( https://github.com/lingtalfi/Bat/blob/master/CaseTool.md )          |       Tools for converting a case to another
+[ClassTool]( https://github.com/lingtalfi/Bat/blob/master/ClassTool.md )          |       Tools for working with classes
 [ExceptionTool]( https://github.com/lingtalfi/Bat/blob/master/ExceptionTool.md )          |       Tools for manipulating exception
 [FileSystemTool]( https://github.com/lingtalfi/Bat/blob/master/FileSystemTool.md )          |       Tools for the filesystem
+[FileTool]( https://github.com/lingtalfi/Bat/blob/master/FileTool.md )          |                   Tools for the files
 [LocalHostTool](  https://github.com/lingtalfi/Bat/blob/master/LocalHostTool.md )          |       Tools aware of the local host
 [MimeTypeTool](  https://github.com/lingtalfi/Bat/blob/master/MimeTypeTool.md )          |       Tool handling mime type
 [PermTool](  https://github.com/lingtalfi/Bat/blob/master/PermTool.md )          |       Tool for permissions manipulation
 [StringTool]( https://github.com/lingtalfi/Bat/blob/master/StringTool.md )          |       Tools for string manipulation
 [UriTool]( https://github.com/lingtalfi/Bat/blob/master/UriTool.md )          |       Tools for uri manipulation
 [ValidationTool]( https://github.com/lingtalfi/Bat/blob/master/ValidationTool.md )          |       Tools for validating data
+[ZipTool]( https://github.com/lingtalfi/Bat/blob/master/ZipTool.md )          |       Zip related tool
 
 
 
@@ -48,6 +51,50 @@ Dependencies
 
 History Log
 ------------------
+    
+- 1.44 -- 2017-03-27
+
+    - add ClassTool.getMethodInnerContent
+    
+- 1.43 -- 2017-03-26
+
+    - fix ClassTool.getMethodContent return false if the function does not exist.
+    
+- 1.42 -- 2017-03-24
+
+    - fix FileTool.split
+    
+- 1.41 -- 2017-03-24
+
+    - add FileTool.split
+    
+- 1.40 -- 2016-12-29
+
+    - fix ZipTool
+    
+- 1.39 -- 2016-12-29
+
+    - add ZipTool
+    
+- 1.38 -- 2016-12-25
+
+    - add ClassTool::rewriteMethodContent
+    
+- 1.37 -- 2016-12-24
+
+    - add ClassTool
+    
+- 1.36 -- 2016-12-23
+
+    - add FileTool::getNbLines
+    
+- 1.35 -- 2016-12-23
+
+    - add FileSystemTool::tempDir
+    
+- 1.34 -- 2016-12-22
+
+    - add ClassTool
     
 - 1.33 -- 2016-12-02
 
