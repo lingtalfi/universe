@@ -1,0 +1,12 @@
+cache/
+data/
+logs/
+private/
+uploads/
+_shortcuts/
+.DS_Store
+.git/
+private/
+.DS_Store
+.idea/
+.git/
